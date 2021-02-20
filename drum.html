@@ -1,0 +1,270 @@
+<html>
+    <head>
+        <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+        <style>
+            body {
+                background-color: gray;
+            }
+            .box-center {
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                margin: auto;
+            }
+            .main-box {
+                border: 1px solid black;
+                width: 660px;
+                height: 270px;
+                position: absolute;
+                padding: 10px;
+                background-color: #b3b3b3;
+                outline: 5px solid orange;
+            }
+            .left-box{
+                width: 55%;
+                height: 100%;
+                float: left;
+                position: relative;
+            }
+            .left-box table {
+                width: 80%;
+                height: 75%;
+                position: absolute;
+                border-spacing: 6px;
+                border-collapse: separate;
+            }
+            .left-box table button {
+                width:100%;
+                height: 100%;
+                box-shadow: grey 20px 22px 19px;
+                background: grey;
+                border-radius: 5px;
+                font-size: 25px;
+                font-weight: bold;
+            }
+            .right-box{
+                text-align: center;
+                border: 1px solid black;
+                width: 40%;
+                height: 100%;
+                float: right;
+            }
+            .toggle {
+                margin-top: 20px;
+            }
+            .toggle label {
+                font-size: 21px;
+                font-weight: 600;;
+            }
+            /* The switch - the box around the slider */
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 25px;
+            }
+
+            /* Hide default HTML checkbox */
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            /* The slider */
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: black;
+                -webkit-transition: .1s;
+                transition: .1s;
+            } 
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 17px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: blue;
+                -webkit-transition: .1s;
+                transition: .1s;
+            }
+
+            input:checked + .slider {
+                background-color: black;
+            }
+
+            input:focus + .slider {
+               box-shadow: 0 0 1px black;
+            }
+
+            input:checked + .slider:before {
+                -webkit-transform: translateX(26px);
+                -ms-transform: translateX(26px);
+                transform: translateX(26px);
+            }
+            .screen {
+                height: 55px;
+                width: 200px;
+                background-color: gray;
+                margin: 15px auto;
+                box-sizing: border-box;
+                padding-top: 18px;
+            }
+            .drum-pad {
+                text-transform: capitalize;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+    <script  type="text/babel">
+
+        const DrumPad = (props) => {
+            const bankoffScreen = [
+                {
+                    'q' : 'Heater 1',
+                    'w' : 'Heater 2',
+                    'e' : 'Heater 3',
+                },
+                {
+                    'a' : 'Heater 4',
+                    's' : 'Clap',
+                    'd' : 'Open HH',
+                },
+                {
+                    'z' : "Kick n' Hat",
+                    'x' : 'Kick',
+                    'c' : 'Closed HH',
+                }
+            ];
+
+            const bankonScreen = [
+                {
+                    'q' : 'Chord 1',
+                    'w' : 'Chord 2',
+                    'e' : 'Chord 3',
+                },
+                {
+                    'a' : 'Shaker',
+                    's' : 'Open HH',
+                    'd' : 'Closed HH',
+                },
+                {
+                    'z' : "Punchy kick",
+                    'x' : 'Side Stick',
+                    'c' : 'Snare',
+                }
+            ];
+
+            let activeScreen = props.bankStatus ? bankonScreen : bankoffScreen;
+
+            let tableContent = activeScreen.map((tr, b) => {
+                return (<tr key={'activeScreen' + b}>
+                    {
+                        Object.entries(tr).map(entry => {
+                            return (
+                                <td key={entry[0]} ><button onClick={() => props.padClicked(entry[1])} className="drum-pad">{entry[0]}</button></td>
+                            )
+                        })
+                    }
+                </tr>
+                )
+            })
+
+            return (
+                <table className="box-center">
+                    <tbody>
+                        {tableContent}
+                    </tbody>
+                </table>
+            );
+        }
+
+        const Display = (props) => {
+            return (
+                <p id="display" className="screen">{props.screenText}</p>
+            );
+        }
+
+        const ToggleSwitch = (props) => {
+            return (
+                <div className="toggle">
+                    <label>{props.label}</label>
+                    <div>
+                        <label className="switch">
+                            <input type="checkbox" onChange={() => props.changeToggle(`${props.label}`)}  checked={props.isChecked} />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            );
+        }
+
+        class DrumMachine extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    powerSwitch: true,
+                    bankSwitch: false,
+                    screenText: 'Nothing'
+                }
+            }
+            padButtonClicked(letter) {
+                this.setState((p,n) => {
+                    return {
+                        screenText: letter.toUpperCase()
+                    }
+                })
+            }
+            changeToggle(station) {
+                this.setState((p, n) => {
+                    var newState = {};
+                    switch (station.toLowerCase()) {
+                        case 'power':
+                            newState = {
+                                powerSwitch: !p.powerSwitch
+                            }
+                        break;
+                        case 'bank':
+                            newState = {
+                                bankSwitch: !p.bankSwitch
+                            }
+                        break;
+                        default: 
+                            newState = {};
+                    }
+                    return newState;
+                });
+            }
+            render() {
+                return (
+                    <div id="drum-machine" className="main-box box-center">
+                        <div className="left-box">
+                            <DrumPad padClicked={this.padButtonClicked.bind(this)} bankStatus={this.state.bankSwitch} />
+                        </div>
+                        <div className="right-box">
+                            <ToggleSwitch label="Power" changeToggle={this.changeToggle.bind(this)}  isChecked={this.state.powerSwitch}/>
+                            <Display screenText={this.state.screenText} />
+                            <ToggleSwitch label="Bank" changeToggle={this.changeToggle.bind(this)}  isChecked={this.state.bankSwitch}/>
+                        </div>
+                    </div>
+                    )
+            }
+        }
+
+        ReactDOM.render(<DrumMachine />, document.getElementById('app'));
+
+    </script>
+</html>
